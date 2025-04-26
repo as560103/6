@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP8266 控制面板</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      text-align: center;
+      margin: 0;
+      padding: 50px;
+    }
+    h1 {
+      color: #333;
+    }
+    .status {
+      font-size: 1.5em;
+      margin: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .status.open {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .status.closed {
+      background-color: #f44336;
+      color: white;
+    }
+    button {
+      padding: 15px 25px;
+      font-size: 1.2em;
+      background-color: #008CBA;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #007B9E;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ESP8266 開關控制</h1>
+
+  <div id="relayStatus" class="status closed">繼電器：關閉</div>
+
+  <button onclick="toggleRelay()">切換繼電器</button>
+
+  <script>
+    const espIP = "http://192.168.1.101"; // 替換為您的 ESP8266 的 IP 地址
+
+    // 切換繼電器
+    function toggleRelay() {
+      fetch(`${espIP}/toggle`, { method: "GET" })  // 發送 GET 請求
+        .then(response => response.text())
+        .then(data => {
+          if (data.includes("開啟")) {
+            document.getElementById("relayStatus").innerText = "繼電器：開啟";
+            document.getElementById("relayStatus").className = "status open";
+          } else {
+            document.getElementById("relayStatus").innerText = "繼電器：關閉";
+            document.getElementById("relayStatus").className = "status closed";
+          }
+        })
+        .catch(error => {
+          console.error("錯誤:", error);
+          alert("無法控制繼電器，請檢查連接！");
+        });
+    }
+
+    // 每秒檢查一次繼電器的狀態
+    setInterval(() => {
+      fetch(`${espIP}/`)
+        .then(response => response.text())
+        .then(data => {
+          if (data.includes("開啟")) {
+            document.getElementById("relayStatus").innerText = "繼電器：開啟";
+            document.getElementById("relayStatus").className = "status open";
+          } else {
+            document.getElementById("relayStatus").innerText = "繼電器：關閉";
+            document.getElementById("relayStatus").className = "status closed";
+          }
+        })
+        .catch(error => {
+          console.error("錯誤:", error);
+          alert("無法讀取繼電器狀態，請檢查連接！");
+        });
+    }, 1000);
+  </script>
+
+</body>
+</html>
